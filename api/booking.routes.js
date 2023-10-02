@@ -14,22 +14,48 @@ router.get('/getAll', async (req, res) => {
 });
 
 router.post('/add', async (req, res) => {
-  const { firstname, lastname, email, contact_no, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills	
-  } = req.body;
-
-  // Insert a new user into the database
-  const sql = 'INSERT INTO booking_tbl (firstname, lastname, email, contact_no, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  const values = [firstname, lastname, email, contact_no, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills];
-
-  try {
-    const [result] = await db.execute(sql, values);
-
-    res.status(201).json({ message: 'Booking created', id: result.insertId });
-  } catch (err) {
-    console.error('Error creating booking:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+    try {
+      const {
+        user_id,
+        departure_date,
+        return_date,
+        no_of_pax_adults,
+        no_of_pax_kids,
+        total_of_bills,
+      } = req.body;
+  
+      // Check if any of the required fields is missing
+      if (
+        !user_id ||
+        !departure_date ||
+        !return_date ||
+        !no_of_pax_adults ||
+        !no_of_pax_kids ||
+        !total_of_bills
+      ) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+  
+      // Insert a new booking into the database
+      const sql =
+        'INSERT INTO booking_tbl (user_id, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills) VALUES (?, ?, ?, ?, ?, ?)';
+      const values = [
+        user_id,
+        departure_date,
+        return_date,
+        no_of_pax_adults,
+        no_of_pax_kids,
+        total_of_bills,
+      ];
+  
+      const [result] = await db.execute(sql, values);
+  
+      res.status(201).json({ message: 'Booking created', id: result.insertId });
+    } catch (err) {
+      console.error('Error creating booking:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
 router.delete('/delete/:id', async (req, res) => {
     const bookingId = req.params.id;
@@ -50,11 +76,11 @@ router.delete('/delete/:id', async (req, res) => {
 
   router.put('/update/:id', async (req, res) => {
     const { id } = req.params; // Extract user ID from the URL
-    const { firstname, lastname, email, contact_no, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills } = req.body;
+    const { user_id, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills } = req.body;
   
     // Update the user in the database
-    const sql = 'UPDATE booking_tbl SET  firstname = ?, lastname = ?, email = ?, contact_no = ?, departure_date = ?, return_date = ?, no_of_pax_adults = ?, no_of_pax_kids = ?, total_of_bills = ? WHERE id = ?';
-    const values = [firstname, lastname, email, contact_no, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills, id];
+    const sql = 'UPDATE booking_tbl SET  user_id = ?, departure_date = ?, return_date = ?, no_of_pax_adults = ?, no_of_pax_kids = ?, total_of_bills = ? WHERE id = ?';
+    const values = [user_id, departure_date, return_date, no_of_pax_adults, no_of_pax_kids, total_of_bills, id];
   
     try {
       const [result] = await db.execute(sql, values);
